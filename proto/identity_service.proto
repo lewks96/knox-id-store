@@ -1,0 +1,196 @@
+syntax = "proto3";
+
+package identity;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Service definition for Identity operations
+service IdentityService {
+    // Creates a new identity.
+    rpc CreateIdentity(CreateIdentityRequest) returns (IdentityResponse);
+
+    // Retrieves an identity by its UUID.
+    rpc GetIdentityById(GetIdentityByIdRequest) returns (GetIdentityResponse);
+
+    // Retrieves an identity by its username.
+    rpc GetIdentityByUsername(GetIdentityByUsernameRequest) returns (GetIdentityResponse);
+
+    // Retrieves an identity by its email address.
+    rpc GetIdentityByEmail(GetIdentityByEmailRequest) returns (GetIdentityResponse);
+
+    // Updates an existing identity.
+    rpc UpdateIdentity(UpdateIdentityRequest) returns (IdentityResponse);
+
+    // Deletes an identity by its UUID.
+    rpc DeleteIdentity(DeleteIdentityRequest) returns (google.protobuf.Empty);
+
+    // Authenticates an identity using its ID and password.
+    // The service is expected to handle hashing and comparison.
+    rpc Authenticate(AuthenticateRequest) returns (IdentityResponse);
+
+    // Sets the active status of an identity.
+    rpc SetActive(SetActiveRequest) returns (IdentityResponse);
+
+    // Sets the verified status of an identity.
+    rpc SetVerified(SetVerifiedRequest) returns (IdentityResponse);
+
+    // Sets the enabled status of an identity.
+    rpc SetEnabled(SetEnabledRequest) returns (IdentityResponse);
+
+    // Resets the password for an identity.
+    rpc ResetPassword(ResetPasswordRequest) returns (IdentityResponse);
+
+    // Changes the email address for an identity.
+    rpc ChangeEmail(ChangeEmailRequest) returns (IdentityResponse);
+
+    // Changes the username for an identity.
+    rpc ChangeUsername(ChangeUsernameRequest) returns (IdentityResponse);
+}
+
+// Message Definitions
+
+// Represents an Identity entity.
+// Corresponds to the Rust `Identity` struct.
+message Identity {
+    // The unique identifier for the identity (UUID).
+    string id = 1;
+    // The first name of the identity holder.
+    string first_name = 2;
+    // The last name of the identity holder.
+    string last_name = 3;
+    // The username for the identity.
+    string username = 4;
+    // The email address for the identity.
+    string email_address = 5;
+    // The number of failed password attempts.
+    int32 password_attempts = 6;
+    // Timestamp of the last successful authentication. Optional.
+    optional google.protobuf.Timestamp last_authenticated_at = 7;
+    // Flag indicating if the identity is active.
+    bool is_active = 8;
+    // Flag indicating if the identity's email (or other factor) is verified.
+    bool is_verified = 9;
+    // Flag indicating if the identity is enabled for login.
+    bool is_enabled = 10;
+    // Timestamp of when the identity was created. Optional.
+    optional google.protobuf.Timestamp created_at = 11;
+    // Timestamp of when the identity was last updated. Optional.
+    optional google.protobuf.Timestamp updated_at = 12;
+}
+
+// Payload for creating a new identity.
+// Corresponds to the Rust `CreateIdentityPayload` struct.
+message CreateIdentityPayload {
+    string first_name = 1;
+    string last_name = 2;
+    string username = 3;
+    string email_address = 4;
+    // Initial number of password attempts. Aligned with Identity.password_attempts (int32).
+    int32 password_attempts = 5;
+    // Optional initial password for the identity.
+    optional string password = 6;
+    bool is_active = 7;
+    bool is_verified = 8;
+    bool is_enabled = 9;
+}
+
+// Payload for updating an existing identity.
+// Corresponds to the Rust `IdentityUpdate` struct.
+// Fields are marked 'optional' to indicate they may or may not be set for an update.
+message IdentityUpdatePayload {
+    optional string first_name = 1;
+    optional string last_name = 2;
+    optional string username = 3;
+    optional string email_address = 4;
+    optional bool is_active = 5;
+    optional bool is_verified = 6;
+    optional bool is_enabled = 7;
+}
+
+// Request and Response messages for RPC methods
+
+// Request for CreateIdentity RPC.
+message CreateIdentityRequest {
+    CreateIdentityPayload payload = 1;
+}
+
+// Generic response message that returns a single Identity.
+message IdentityResponse {
+    Identity identity = 1;
+}
+
+// Request for GetIdentityById RPC.
+message GetIdentityByIdRequest {
+    string id = 1; // UUID of the identity.
+}
+
+// Generic response message that returns an optional Identity.
+// Used by GetIdentityById, GetIdentityByUsername, GetIdentityByEmail.
+message GetIdentityResponse {
+    optional Identity identity = 1;
+}
+
+// Request for GetIdentityByUsername RPC.
+message GetIdentityByUsernameRequest {
+    string username = 1;
+}
+
+// Request for GetIdentityByEmail RPC.
+message GetIdentityByEmailRequest {
+    string email_address = 1;
+}
+
+// Request for UpdateIdentity RPC.
+message UpdateIdentityRequest {
+    string id = 1; // UUID of the identity to update.
+    IdentityUpdatePayload updates = 2; // The fields to update.
+}
+
+// Request for DeleteIdentity RPC.
+message DeleteIdentityRequest {
+    string id = 1; // UUID of the identity to delete.
+}
+// DeleteIdentity RPC returns google.protobuf.Empty.
+
+// Request for Authenticate RPC.
+message AuthenticateRequest {
+    string id = 1; // UUID of the identity to authenticate.
+    string password = 2; // Plain password to verify.
+}
+
+// Request for SetActive RPC.
+message SetActiveRequest {
+    string id = 1; // UUID of the identity.
+    bool is_active = 2; // The new active status.
+}
+
+// Request for SetVerified RPC.
+message SetVerifiedRequest {
+    string id = 1; // UUID of the identity.
+    bool is_verified = 2; // The new verified status.
+}
+
+// Request for SetEnabled RPC.
+message SetEnabledRequest {
+    string id = 1; // UUID of the identity.
+    bool is_enabled = 2; // The new enabled status.
+}
+
+// Request for ResetPassword RPC.
+message ResetPasswordRequest {
+    string id = 1; // UUID of the identity.
+    string new_password = 2; // The new password.
+}
+
+// Request for ChangeEmail RPC.
+message ChangeEmailRequest {
+    string id = 1; // UUID of the identity.
+    string new_email_address = 2; // The new email address.
+}
+
+// Request for ChangeUsername RPC.
+message ChangeUsernameRequest {
+    string id = 1; // UUID of the identity.
+    string new_username = 2; // The new username.
+}
