@@ -1,0 +1,2 @@
+DATABASE_URL="postgresql://dbuser:dbpassword@localhost:5432/db"
+LOG_LEVEL=debug
